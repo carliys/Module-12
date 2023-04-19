@@ -59,6 +59,17 @@ const mainMenu = () => {
     });
 };
 
+const selectDepartments = () => {
+    connection.query(
+        'select * from department;',
+        (error, results) => {
+            console.table(results);
+            mainMenu();
+
+        }
+    );
+};
+
 
 mainMenu();
 

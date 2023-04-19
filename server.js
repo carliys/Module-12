@@ -14,7 +14,7 @@ var connection = mysql.createConnection({
 });
 
 const mainMenu = () => {
-    return inquirer.createPromptModule([{
+    return inquirer.prompt([{
 
         name: 'mainMenu',
         type: 'list',

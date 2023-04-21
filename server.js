@@ -2,7 +2,7 @@ const inquirer = require("inquirer");
 const fs = require("fs");
 
 const mysql = require('mysql2');
-require('dotenv').config();
+// require('dotenv').config();
 require('console.table');
 
 var connection = mysql.createConnection({
@@ -101,8 +101,6 @@ const selectEmployees = () => {
     )
 };
 
-
-
 const promptAddDepartment = () => {
     inquirer.prompt([
         {
@@ -125,6 +123,71 @@ const promptAddDepartment = () => {
             })
         }
 
+        const promptAddRole = () => {
+
+            return connection.promise().query(
+                "SELECT department.id, department.name FROM department;"
+            )
+                .then(([departments]) => {
+                    let departmentChoices = departments.map(({
+                        id,
+                        name
+                    }) => ({
+                        name: name,
+                        value: id
+                    }));
+        
+                    inquirer.prompt(
+                        [{
+                            type: 'input',
+                            name: 'title',
+                            message: 'Enter the name of your title (Required)',
+                            validate: titleName => {
+                                if (titleName) {
+                                    return true;
+                                } else {
+                                    console.log('Please enter your title name!');
+                                    return false;
+                                }
+                            }
+                        },
+                        {
+                            type: 'list',
+                            name: 'department',
+                            message: 'Which department are you from?',
+                            choices: departmentChoices
+                        },
+                        {
+                            type: 'input',
+                            name: 'salary',
+                            message: 'Enter your salary (Required)',
+                            validate: salary => {
+                                if (salary) {
+                                    return true;
+                                } else {
+                                    console.log('Please enter your salary!');
+                                    return false;
+                                }
+                            }
+                        }
+                        ]
+                    )
+                        .then(({ title, department, salary }) => {
+                            const query = connection.query(
+                                'INSERT INTO role SET ?',
+                                {
+                                    title: title,
+                                    department_id: department,
+                                    salary: salary
+                                },
+                                function (err, res) {
+                                    if (err) throw err;
+                                }
+                            )
+                        }).then(() => selectRoles())
+        
+                })
+        }
 
     
 

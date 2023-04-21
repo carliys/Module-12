@@ -83,12 +83,25 @@ const selectRoles = () => {
     )
 };
 
-const selectEmployees = () => {
+// viewing the employees
+/* const selectEmployees = () => {
     connection.query(`SELECT * FROM employee;`, 
     (err, results) => {
         mainMenu();
     });
-}
+} */
+
+const selectEmployees = () => {
+    connection.query(
+        "SELECT E.id, E.first_name, E.last_name, R.title, D.name AS department, R.salary, CONCAT(M.first_name,' ',M.last_name) AS manager FROM employee E JOIN role R ON E.role_id = R.id JOIN department D ON R.department_id = D.id LEFT JOIN employee M ON E.manager_id = M.id;",
+        (err, results) => {
+            console.table(results);
+            mainMenu();
+        }
+    )
+};
+
+
 
 const promptAddDepartment = () => {
     inquirer.prompt([

@@ -3,6 +3,7 @@ const fs = require("fs");
 
 const mysql = require('mysql2');
 require('dotenv').config();
+require('console.table');
 
 var connection = mysql.createConnection({
 
@@ -11,12 +12,14 @@ var connection = mysql.createConnection({
     password: 'Thegame1',
     database: 'employees_db'
 
-});
+},
+    console.log('Connected to employees_db Database!')
+);
 
 const mainMenu = () => {
     return inquirer.prompt([{
 
-        name: 'mainMenu',
+        name: 'main_menu',
         type: 'list',
         message: 'What would you like to do?',
         choices: [
@@ -31,7 +34,7 @@ const mainMenu = () => {
         ]
     }])
     .then(userChoice => {
-        switch (userChoice.menu) {
+        switch (userChoice.main_menu) {
             case 'view all departments':
                 selectDepartments();
                     break;
@@ -61,7 +64,7 @@ const mainMenu = () => {
 
 const selectDepartments = () => {
     connection.query(
-        'select * from department;',
+        'select * from departments;',
         (error, results) => {
             console.table(results);
             mainMenu();
@@ -70,6 +73,47 @@ const selectDepartments = () => {
     );
 };
 
+const selectRoles = () => {
+    connection.query(
+        'select * from roles;',
+        (error, results) => {
+            console.table(results);
+            mainMenu();
+        }
+    )
+};
+
+const selectEmployees = () => {
+    connection.query(`SELECT * FROM employee;`, 
+    (err, results) => {
+        mainMenu();
+    });
+}
+
+const promptAddDepartment = () => {
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "name",
+            message: "What is the name of the department you'd like to add?",
+            validate: departmentName => {
+                if (departmentName) {
+                    return true;
+                } else {
+                    console.log('Please enter the name of your department!');
+                    return false;
+                }
+            }
+        }
+        ])
+            .then(name => {
+                connection.promise().query("INSERT INTO department SET ?", name);
+                selectDepartments();
+            })
+        }
+
+
+    
 
 mainMenu();
 

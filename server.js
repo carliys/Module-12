@@ -93,7 +93,7 @@ const selectRoles = () => {
 
 const selectEmployees = () => {
     connection.query(
-        "SELECT E.id, E.first_name, E.last_name, R.title, D.name AS department, R.salary, CONCAT(M.first_name,' ',M.last_name) AS manager FROM employee E JOIN role R ON E.role_id = R.id JOIN department D ON R.department_id = D.id LEFT JOIN employee M ON E.manager_id = M.id;",
+        "SELECT Employees.id, Employees.first_name, Employees.last_name, Roles.title, Departments.name AS Departments, Roles.salary, CONCAT(Manager.first_name,' ',Manager.last_name) AS Manager FROM Employees LEFT JOIN Roles ON Employees.role_id = Roles.id LEFT JOIN Departments ON Roles.department_id = Departments.id LEFT JOIN Employees Manager ON Employees.manager_id = Manager.id;",
         (err, results) => {
             console.table(results);
             mainMenu();
@@ -118,7 +118,7 @@ const promptAddDepartment = () => {
         }
         ])
             .then(name => {
-                connection.promise().query("INSERT INTO department SET ?", name);
+                connection.promise().query("INSERT INTO departments SET ?", name);
                 selectDepartments();
             })
         }
@@ -126,7 +126,7 @@ const promptAddDepartment = () => {
         const promptAddRole = () => {
 
             return connection.promise().query(
-                "SELECT department.id, department.name FROM department;"
+                "SELECT departments.id, departments.name FROM departments;"
             )
                 .then(([departments]) => {
                     let departmentChoices = departments.map(({

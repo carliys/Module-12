@@ -174,7 +174,7 @@ const promptAddDepartment = () => {
                     )
                         .then(({ title, department, salary }) => {
                             const query = connection.query(
-                                'INSERT INTO role SET ?',
+                                'INSERT INTO Roles SET ?',
                                 {
                                     title: title,
                                     department_id: department,
@@ -186,11 +186,164 @@ const promptAddDepartment = () => {
                             )
                         }).then(() => selectRoles())
         
+                    })
+                 }
+
+const promptAddEmployee = (roles) => {
+    return connection.promise().query(
+        "SELECT Roles.id, roles.title FROM Roles;"
+    )
+    .then (([employees]) => {
+        let titleChoices = employees.map(({
+            id,
+            title
+        }) => ({
+            value: id,
+            name: title
+        }))
+        connection.promise().query(
+         "SELECT Employees.id, CONCAT(Employees.first_name,'',Employees.last_name) AS manager FROM Employees;"
+        ).then(([manager]) => {
+            let managerChoices = manager.map(({
+                id,
+                manager
+            }) => ({
+                value: id,
+                name: manager
+            }));
+            inquirer.prompt(
+                [{
+                    type: 'input',
+                    name: 'firstName',
+                    message: 'What is employees first name?',
+                    validate: firstName => {
+                        if (firstName) {
+                            return true;
+                        } else {
+                            console.log("enter employees first name please!")
+                            return false;
+                        }
+                    }
+                },
+                {
+                    type: 'input',
+                    name: 'lastName',
+                    message: 'What is employees last name?',
+                    validate: lastName => {
+                        if (lastName) {
+                            return true;
+                        } else {
+                            console.log('enter employees last name please!');
+                            return false;
+                        }
+                    }
+                },
+                {
+                    type: 'list',
+                    name: 'role',
+                    message: 'what is employees role?',
+                    choices: titleChoices
+                },
+                {
+                    type: 'list',
+                    name: 'manager',
+                    messages: 'who is the employees manager?',
+                    choices: managerChoices
+                }
+            ])
+            .then(({firstName, lastName, roles, managers}) => {
+                const query = connection.query(
+                    'INSERT INTO Employees SET;',
+                    {
+                        first_name: firstName,
+                        Last_name: lastName,
+                        role_id: roles,
+                        manager_id: managers
+                    },
+                    function (err, res) {
+                        if (err) throw err;
+                        console.log({ roles, manager})
+                    }
+                )
+            })
+            .then (() => selectEmployees())
+        })
+    })
+}
+ const promptUpdateRole = () => {
+    return connection.promise().query(
+        "SELECT Roles.id, Roles.title, Roles.salary, Roles.department_id FROM Roles;"
+    )
+    .then(([roles]) => {
+        let roleChoices = roles.map((
+            {
+                id,
+                title
+
+            }) => ({
+                value: id,
+                name: title
+            }));
+
+            inquirer.prompt(
+                [
+                    {
+                        type: 'list',
+                        name: 'role',
+                        message: 'Which role do you want to update?',
+                        choices: roleChoices
+                    }
+                ]
+            )
+                .then(role => {
+                    console.log(role);
+                    inquirer.prompt(
+                        [{
+                            type: 'input',
+                            name: 'title',
+                            message: 'Enter the name of your title (Required)',
+                            validate: titleName => {
+                                if (titleName) {
+                                    return true;
+                                } else {
+                                    console.log('Please enter your title name!');
+                                    return false;
+                                }
+                            }
+                        },
+                        {
+                            type: 'input',
+                            name: 'salary',
+                            message: 'Enter your salary (Required)',
+                            validate: salary => {
+                                if (salary) {
+                                    return true;
+                                } else {
+                                    console.log('Please enter your salary!');
+                                    return false;
+                                }
+                            }
+                        }]
+                    )
+                        .then(({ title, salary }) => {
+                            const query = connection.query(
+                                'UPDATE roles SET title = ?, salary = ? WHERE id = ?',
+                                [
+                                    title,
+                                    salary
+                                    ,
+                                    role.roles
+                                ],
+                                function (err, res) {
+                                    if (err) throw err;
+                                }
+                            )
+                        })
+                        .then(() => mainMenu())
                 })
-        }
+        });
 
-    
-
+}; 
 mainMenu();
 
 
